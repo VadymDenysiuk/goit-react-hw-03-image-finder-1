@@ -1,4 +1,8 @@
-const ImageGalleryItem = ({ url }) => {
+const ImageGalleryItem = ({ url, onOpen, getLargeImage, largeImageURL }) => {
+  const onImageOpen = () => {
+    getLargeImage(largeImageURL);
+    onOpen();
+  };
   return (
     <li className="ImageGalleryItem">
       <img
@@ -6,6 +10,7 @@ const ImageGalleryItem = ({ url }) => {
         src={url}
         alt="wow"
         loading="lazy"
+        onClick={onImageOpen}
       />
     </li>
   );

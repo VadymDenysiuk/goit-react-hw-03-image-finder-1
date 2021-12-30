@@ -1,10 +1,16 @@
 import ImageGalleryItem from "../imageGalleryItem/ImageGalleryItem";
 
-const ImageGallery = ({ items }) => {
+const ImageGallery = ({ items, onOpen, getLargeImage }) => {
   return (
     <ul className="ImageGallery">
-      {items.map((item) => (
-        <ImageGalleryItem key={item} url={item} />
+      {items.map(({ id, webformatURL, largeImageURL }) => (
+        <ImageGalleryItem
+          key={id}
+          url={webformatURL}
+          onOpen={onOpen}
+          getLargeImage={getLargeImage}
+          largeImageURL={largeImageURL}
+        />
       ))}
     </ul>
   );

@@ -15,9 +15,6 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalContent = styled.div`
-  min-width: 400px;
-  min-height: 400px;
-  background-color: #fff;
   max-width: calc(100vw - 48px);
   max-height: calc(100vh - 24px);
 `;
