@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { GlobalStyle } from "./styles/GlobalStyles";
 import { ThemeProvider } from "styled-components";
 import "./App.css";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 import colorThemes from "./styles/themes";
 import geometry from "./styles/geomerty";
@@ -13,6 +13,7 @@ import SearchBar from "./components/searchBar/SearchBar";
 import { fetchPictures } from "./servises/apiServices";
 import ImageGallery from "./components/imageGallery/ImageGallery";
 import Button from "./components/button/Button";
+import Loader from "./components/loader/Loader";
 
 export default class App extends Component {
   state = {
@@ -41,18 +42,17 @@ export default class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
-      this.setState({ loading: true });
+      this.setState({ loading: true, galleryItems: [] });
 
       fetchPictures(this.state.query, this.state.page)
         .then((data) => {
-          const normalizeData = this.getNormalizeData(data);
-          this.setState({
-            galleryItems: [...normalizeData],
-          });
+          if (!data.hits.length) {
+            toast("not found photos");
+            return;
+          }
+          this.setState({ galleryItems: [...this.getNormalizeData(data)] });
         })
-        .catch((error) => {
-          this.setState({ error });
-        })
+        .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
     }
 
@@ -62,16 +62,14 @@ export default class App extends Component {
 
     if (prevState.page !== this.state.page) {
       this.setState({ loading: true });
+
       fetchPictures(this.state.query, this.state.page)
-        .then((data) => {
-          const normalizeData = this.getNormalizeData(data);
+        .then((data) =>
           this.setState(({ galleryItems }) => ({
-            galleryItems: [...galleryItems, ...normalizeData],
-          }));
-        })
-        .catch((error) => {
-          this.setState({ error });
-        })
+            galleryItems: [...galleryItems, ...this.getNormalizeData(data)],
+          }))
+        )
+        .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
     }
   }
@@ -126,7 +124,7 @@ export default class App extends Component {
     this.setState({ largeImageURL });
   };
 
-  onLoadrMoreClick = () => {
+  onLoadMoreClick = () => {
     this.setState(({ page }) => ({
       page: page + 1,
     }));
@@ -134,6 +132,7 @@ export default class App extends Component {
 
   render() {
     const {
+      query,
       title,
       pageFormat,
       showModal,
@@ -150,18 +149,24 @@ export default class App extends Component {
         <GlobalStyle />
 
         <div className="App">
-          <SearchBar getQuery={this.getQuery} />
+          <SearchBar getQuery={this.getQuery} query={query} />
+
           {error && <div>{error.message}</div>}
-          {loading && <div>ГРУЗИМ</div>}
-          {galleryItems.length > 0 && (
+          {galleryItems.length > 0 ? (
             <>
               <ImageGallery
                 items={galleryItems}
                 onOpen={this.toggleModal}
                 getLargeImage={this.getLargeImage}
               />
-              <Button onClick={this.onLoadrMoreClick} loading={loading} />
+              {!loading ? (
+                <Button onClick={this.onLoadMoreClick} loading={loading} />
+              ) : (
+                <Loader />
+              )}
             </>
+          ) : (
+            loading && <Loader />
           )}
         </div>
         {showModal && (

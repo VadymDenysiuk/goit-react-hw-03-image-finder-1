@@ -12,9 +12,6 @@
  * Стили компонента Searchbar
  */
 .Searchbar {
-  top: 0;
-  left: 0;
-  position: sticky;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -36,7 +33,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 600px;
+  max-width: 300px;
   background-color: #fff;
   border-radius: 3px;
   overflow: hidden;
@@ -72,13 +69,14 @@
 }
 
 .SearchForm-input {
+  padding-left: 20px;
   display: inline-block;
   width: 100%;
   font: inherit;
   font-size: 20px;
   border: none;
   outline: none;
-  padding-left: 4px;
+  padding-left: 10px;
   padding-right: 4px;
 }
 

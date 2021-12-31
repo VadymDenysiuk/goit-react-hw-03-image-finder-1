@@ -14,7 +14,10 @@ export default class SearchBar extends Component {
       toast("Empty query");
       return;
     }
-
+    if (normalizeQuery === this.props.query) {
+      toast("Same query");
+      return;
+    }
     this.props.getQuery(this.state.searchQuery);
     this.setState({ searchQuery: "" });
   };
@@ -32,10 +35,6 @@ export default class SearchBar extends Component {
     return (
       <header className="Searchbar">
         <form className="SearchForm" onSubmit={this.handleSubmit}>
-          <button type="submit" className="SearchForm-button">
-            <BsSearch color="#55555" />
-          </button>
-
           <input
             onChange={this.handleChange}
             className="SearchForm-input"
@@ -45,6 +44,9 @@ export default class SearchBar extends Component {
             autoFocus
             placeholder="Search images and photos"
           />
+          <button type="submit" className="SearchForm-button">
+            <BsSearch color="#55555" />
+          </button>
         </form>
       </header>
     );
