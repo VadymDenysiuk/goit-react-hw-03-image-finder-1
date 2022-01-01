@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import { BsSearch } from "react-icons/bs";
+
 import toast from "react-hot-toast";
 
 export default class SearchBar extends Component {

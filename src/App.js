@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { GlobalStyle } from "./styles/GlobalStyles";
 import "./styles/App.css";
 import toast, { Toaster } from "react-hot-toast";
+import { BsFillArrowUpCircleFill } from "react-icons/bs";
 
 import Modal from "./components/modal/Modal";
 import SearchBar from "./components/searchBar/SearchBar";
@@ -11,6 +12,7 @@ import ImageGallery from "./components/imageGallery/ImageGallery";
 import Button from "./components/button/Button";
 import Loader from "./components/loader/Loader";
 import Error from "./components/error/Error";
+import ScrollToTop from "react-scroll-to-top";
 
 const api = new Api(not_found_img_url);
 
@@ -39,7 +41,7 @@ export default class App extends Component {
     const { showModal, query, page, galleryItems } = this.state;
 
     if (prevState.query !== query) {
-      this.setState({ loading: true, galleryItems: [], page: 1 });
+      this.setState({ loading: true, galleryItems: [] });
       this.totalHits = null;
 
       api
@@ -56,6 +58,7 @@ export default class App extends Component {
         })
         .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
+      return;
     }
 
     if (prevState.showModal !== showModal && !showModal) {
@@ -89,7 +92,7 @@ export default class App extends Component {
 
   toggleModal = () => this.setState((prev) => ({ showModal: !prev.showModal }));
 
-  getQuery = (query) => this.setState({ query });
+  getQuery = (query) => this.setState({ query, page: 1 });
 
   getmodalContent = (itemId) =>
     this.setState({ modalContent: this.getFilteredItem(itemId) });
@@ -138,12 +141,20 @@ export default class App extends Component {
           )}
         </div>
 
+        <ScrollToTop
+          smooth
+          top="300"
+          style={{
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          }}
+          component={<BsFillArrowUpCircleFill size="2em" color="#cccccc" />}
+        />
         {showModal && (
           <Modal onClose={this.toggleModal}>
             <img src={modalContent.largeImageURL} alt={modalContent.tags} />
           </Modal>
         )}
-
         <Toaster
           toastOptions={{
             position: "bottom-left",

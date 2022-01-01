@@ -12,10 +12,12 @@ export default class Modal extends Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.onEscClick);
+    document.body.style.overflow = "hidden";
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.onEscClick);
+    document.body.style.overflow = "";
   }
 
   onEscClick = (e) => {
