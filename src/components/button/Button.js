@@ -1,25 +1,15 @@
-import React, { Component } from "react";
+import PropTypes from "prop-types";
 
-export default class Button extends Component {
-  state = { disabled: this.props.loading };
+const Button = ({ onClick }) => {
+  return (
+    <button type="button" className="Button" onClick={onClick}>
+      Load more
+    </button>
+  );
+};
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.loading !== this.props.loading) {
-      this.setState({ disabled: this.props.loading });
-    }
-  }
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
 
-  render() {
-    const { disabled } = this.state;
-    return (
-      <button
-        type="button"
-        className="Button"
-        disabled={disabled}
-        onClick={this.props.onClick}
-      >
-        Load more
-      </button>
-    );
-  }
-}
+export default Button;

@@ -10,10 +10,14 @@ import { spacing } from "./styles/geomerty/spacing";
 // import Container from "./components/container/Container";
 import Modal from "./components/modal/Modal";
 import SearchBar from "./components/searchBar/SearchBar";
-import { fetchPictures } from "./servises/apiServices";
+import { Api } from "./servises/apiServices";
+import not_found_img_url from "./images/broken.png";
 import ImageGallery from "./components/imageGallery/ImageGallery";
 import Button from "./components/button/Button";
 import Loader from "./components/loader/Loader";
+import Error from "./components/button/error/Error";
+
+const api = new Api(not_found_img_url);
 
 export default class App extends Component {
   state = {
@@ -25,7 +29,7 @@ export default class App extends Component {
     page: 1,
     loading: false,
     error: null,
-    largeImageURL: null,
+    modalContent: null,
   };
 
   breakPoints = {
@@ -35,38 +39,54 @@ export default class App extends Component {
     desktop: 1024,
   };
 
+  totalHits = null;
+
   componentDidMount() {
     this.onHandleResize();
     window.addEventListener("resize", this.onHandleResize);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.setState({ loading: true, galleryItems: [] });
+    const { showModal, query, page } = this.state;
 
-      fetchPictures(this.state.query, this.state.page)
+    // console.log("title", prevState.title, title);
+    // console.log("pageFormat", prevState.pageFormat, pageFormat);
+    // console.log("showModal", prevState.showModal, showModal);
+    // console.log("query", prevState.query, query);
+    // console.log("galleryItems", prevState.galleryItems, galleryItems);
+    // console.log("page", prevState.page, page);
+    // console.log("loading", prevState.loading, loading);
+    // console.log("error", prevState.error, error);
+
+    if (prevState.query !== query) {
+      this.setState({ loading: true, galleryItems: [], page: 1 });
+      this.totalHits = null;
+
+      api
+        .fetchPictures(query, page)
         .then((data) => {
           if (!data.hits.length) {
             toast("not found photos");
             return;
           }
-          this.setState({ galleryItems: [...this.getNormalizeData(data)] });
+          this.totalHits = data.totalHits;
+          this.setState({ galleryItems: [...api.getNormalizeData(data)] });
         })
         .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
     }
 
-    if (prevState.showModal !== this.state.showModal && !this.state.showModal) {
-      this.setState({ largeImageURL: null });
+    if (prevState.showModal !== showModal && !showModal) {
+      this.setState({ modalContent: null });
     }
 
-    if (prevState.page !== this.state.page) {
+    if (prevState.page !== page) {
       this.setState({ loading: true });
-
-      fetchPictures(this.state.query, this.state.page)
+      api
+        .fetchPictures(query, page)
         .then((data) =>
           this.setState(({ galleryItems }) => ({
-            galleryItems: [...galleryItems, ...this.getNormalizeData(data)],
+            galleryItems: [...galleryItems, ...api.getNormalizeData(data)],
           }))
         )
         .catch((error) => this.setState({ error }))
@@ -77,13 +97,6 @@ export default class App extends Component {
   componentWillUnmount() {
     window.removeEventListener("resize", this.onHandleResize);
   }
-
-  getNormalizeData = ({ hits }) =>
-    hits.map(({ id, webformatURL, largeImageURL }) => ({
-      id,
-      webformatURL,
-      largeImageURL,
-    }));
 
   // switch state.pageFormat / response / mobile / tablet / desktop
   onHandleResize = () => {
@@ -109,26 +122,17 @@ export default class App extends Component {
     }
   };
 
-  toggleModal = () => {
-    this.setState((prev) => ({
-      showModal: !prev.showModal,
-    }));
-  };
+  toggleModal = () => this.setState((prev) => ({ showModal: !prev.showModal }));
 
-  getQuery = (query) => {
-    this.setState({ query, page: 1 });
-  };
+  getQuery = (query) => this.setState({ query });
 
-  getLargeImage = (largeImageURL) => {
-    console.log(largeImageURL);
-    this.setState({ largeImageURL });
-  };
+  getmodalContent = (itemId) =>
+    this.setState({ modalContent: this.getFilteredItem(itemId) });
 
-  onLoadMoreClick = () => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-    }));
-  };
+  getFilteredItem = (itemId) =>
+    this.state.galleryItems.filter((item) => item.id === itemId)[0];
+
+  onLoadMoreClick = () => this.setState(({ page }) => ({ page: page + 1 }));
 
   render() {
     const {
@@ -139,8 +143,11 @@ export default class App extends Component {
       galleryItems,
       loading,
       error,
-      largeImageURL,
+      modalContent,
+      page,
     } = this.state;
+
+    const isLastPage = api.countTotalResults(page) > this.totalHits;
 
     return (
       <ThemeProvider
@@ -151,16 +158,16 @@ export default class App extends Component {
         <div className="App">
           <SearchBar getQuery={this.getQuery} query={query} />
 
-          {error && <div>{error.message}</div>}
+          {error && <Error errorMsg={error.message} />}
           {galleryItems.length > 0 ? (
             <>
               <ImageGallery
                 items={galleryItems}
                 onOpen={this.toggleModal}
-                getLargeImage={this.getLargeImage}
+                getItemId={this.getmodalContent}
               />
               {!loading ? (
-                <Button onClick={this.onLoadMoreClick} loading={loading} />
+                !isLastPage && <Button onClick={this.onLoadMoreClick} />
               ) : (
                 <Loader />
               )}
@@ -169,23 +176,23 @@ export default class App extends Component {
             loading && <Loader />
           )}
         </div>
+
         {showModal && (
           <Modal onClose={this.toggleModal}>
-            <img src={largeImageURL} alt="" />
+            <img src={modalContent.largeImageURL} alt={modalContent.tags} />
           </Modal>
         )}
-        <div>
-          <Toaster
-            toastOptions={{
-              position: "top-right",
-              style: {
-                borderRadius: "10px",
-                background: "#236d44",
-                color: "#fff",
-              },
-            }}
-          />
-        </div>
+
+        <Toaster
+          toastOptions={{
+            position: "bottom-left",
+            style: {
+              borderRadius: "10px",
+              background: "#000000",
+              color: "#fff",
+            },
+          }}
+        />
       </ThemeProvider>
     );
   }

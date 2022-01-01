@@ -1,6 +1,8 @@
-const ImageGalleryItem = ({ url, onOpen, getLargeImage, largeImageURL }) => {
+import PropTypes from "prop-types";
+
+const ImageGalleryItem = ({ url, onOpen, getItemId, id, tags }) => {
   const onImageOpen = () => {
-    getLargeImage(largeImageURL);
+    getItemId(id);
     onOpen();
   };
   return (
@@ -8,12 +10,20 @@ const ImageGalleryItem = ({ url, onOpen, getLargeImage, largeImageURL }) => {
       <img
         className="ImageGalleryItem-image"
         src={url}
-        alt="wow"
+        alt={tags || "wonderfull photo"}
         loading="lazy"
         onClick={onImageOpen}
       />
     </li>
   );
+};
+
+ImageGalleryItem.propTypes = {
+  url: PropTypes.string.isRequired,
+  onOpen: PropTypes.func.isRequired,
+  getItemId: PropTypes.func.isRequired,
+  id: PropTypes.number.isRequired,
+  tags: PropTypes.string,
 };
 
 export default ImageGalleryItem;

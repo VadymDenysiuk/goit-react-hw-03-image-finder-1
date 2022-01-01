@@ -1,122 +1,82 @@
-const API_KEY = "24136877-bceaa9033dc460acdc4ccde64";
-const BASE_API_URL = "https://pixabay.com/api/";
-const options = {
-  orientation: "horizontal",
-  image_type: "photo",
-  per_page: 12,
-};
+// const API_KEY = "24136877-bceaa9033dc460acdc4ccde64";
+// const BASE_API_URL = "https://pixabay.com/api/";
+// const options = {
+//   orientation: "horizontal",
+//   image_type: "photo",
+//   per_page: 12,
+// };
 
-export const fetchPictures = async (query, page = 1) => {
-  try {
-    const urlParams = new URLSearchParams({
-      key: API_KEY,
-      q: query,
-      page,
-      ...options,
-    });
+// export const fetchPictures = async (query, page = 1) => {
+//   try {
+//     const urlParams = new URLSearchParams({
+//       key: API_KEY,
+//       q: query,
+//       page,
+//       ...options,
+//     });
 
-    const res = await fetch(`${BASE_API_URL}?${urlParams}`); // await
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(new Error(`${query} is not found`));
-  } catch (error) {
-    console.log("Ошибка", error);
-    return error;
-  }
-};
+//     const res = await fetch(`${BASE_API_URL}?${urlParams}`); // await
+//     if (res.ok) {
+//       return res.json();
+//     }
+//     return Promise.reject(new Error(`${query} is not found`));
+//   } catch (error) {
+//     console.log("Ошибка", error);
+//     return error;
+//   }
+// };
 
-export class ApiService {
+export class Api {
   #API_KEY = "24136877-bceaa9033dc460acdc4ccde64";
   #BASE_API_URL = "https://pixabay.com/api/";
 
   constructor(not_fnd_img_url) {
-    this.query = "";
-    this.page = 1;
     this.per_page = 12;
     this.orientation = "horizontal";
     this.image_type = "photo";
-    this.resultsCounter = null;
     this._imageNotFoundLink = not_fnd_img_url;
   }
 
-  fetchPictures = async (searchQuery) => {
+  fetchPictures = async (query, page = 1) => {
     try {
-      this.query = searchQuery;
-
       const urlParams = new URLSearchParams({
+        key: this.#API_KEY,
         image_type: this.image_type,
         orientation: this.orientation,
-        q: this.query,
-        page: this.page,
+        q: query,
+        page,
         per_page: this.per_page,
-        key: this.#API_KEY,
       });
 
       const res = await fetch(`${this.#BASE_API_URL}?${urlParams}`); // await
       if (res.ok) {
         return res.json();
       }
-      return Promise.reject({
-        title: res.status,
-        message: res.statusText,
-      });
+      return Promise.reject(new Error(`${query} is not found`));
     } catch (error) {
-      return Promise.reject({
-        title: error.message,
-      });
+      console.log("Ошибка", error);
+      return error;
     }
   };
 
-  fetchByID = async (id) => {
-    const urlParams = new URLSearchParams({
-      id,
-      key: this.#API_KEY,
-    });
-    try {
-      const res = await fetch(`${this.#BASE_API_URL}?${urlParams}`); // await
-      if (res.ok) {
-        return res.json();
+  countTotalResults = (page) => page * this.per_page;
+
+  getNormalizeData = ({ hits }, page) => {
+    const normalizeHits = hits.map(
+      ({ id, webformatURL, largeImageURL, tags }) => {
+        const imageUrl = webformatURL ? webformatURL : this._imageNotFoundLink;
+        const largeimageUrl = largeImageURL
+          ? largeImageURL
+          : this._imageNotFoundLink;
+        return {
+          id,
+          webformatURL: imageUrl,
+          largeImageURL: largeimageUrl,
+          page,
+          tags,
+        };
       }
-      return Promise.reject({
-        title: res.status,
-        message: res.statusText,
-      });
-    } catch (error) {
-      return Promise.reject({
-        title: error.message,
-      });
-    }
-  };
-
-  incrementPage = () => {
-    this.page += 1;
-  };
-
-  resetPage = () => {
-    this.page = 1;
-  };
-
-  countTotalResults = () => {
-    this.resultsCounter = this.page * this.per_page;
-  };
-
-  getNormalizeData = (data) => {
-    const results = data.hits;
-
-    const normalizeHits = results.map((result) => {
-      const imageUrl = result.webformatURL
-        ? result.webformatURL
-        : this._imageNotFoundLink;
-      return {
-        ...result,
-        page: this.page,
-        webformatURL: imageUrl,
-      };
-    });
-    return {
-      ...data,
-      hits: normalizeHits,
-    };
+    );
+    return normalizeHits;
   };
 }
