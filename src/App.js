@@ -1,13 +1,8 @@
 import React, { Component } from "react";
 import { GlobalStyle } from "./styles/GlobalStyles";
-import { ThemeProvider } from "styled-components";
-import "./App.css";
+import "./styles/App.css";
 import toast, { Toaster } from "react-hot-toast";
 
-import colorThemes from "./styles/themes";
-import geometry from "./styles/geomerty";
-import { spacing } from "./styles/geomerty/spacing";
-// import Container from "./components/container/Container";
 import Modal from "./components/modal/Modal";
 import SearchBar from "./components/searchBar/SearchBar";
 import { Api } from "./servises/apiServices";
@@ -15,14 +10,12 @@ import not_found_img_url from "./images/broken.png";
 import ImageGallery from "./components/imageGallery/ImageGallery";
 import Button from "./components/button/Button";
 import Loader from "./components/loader/Loader";
-import Error from "./components/button/error/Error";
+import Error from "./components/error/Error";
 
 const api = new Api(not_found_img_url);
 
 export default class App extends Component {
   state = {
-    title: "dark",
-    pageFormat: "desktop",
     showModal: false,
     query: null,
     galleryItems: [],
@@ -40,23 +33,10 @@ export default class App extends Component {
   };
 
   totalHits = null;
-
-  componentDidMount() {
-    this.onHandleResize();
-    window.addEventListener("resize", this.onHandleResize);
-  }
+  firstFindItemId = null;
 
   componentDidUpdate(prevProps, prevState) {
-    const { showModal, query, page } = this.state;
-
-    // console.log("title", prevState.title, title);
-    // console.log("pageFormat", prevState.pageFormat, pageFormat);
-    // console.log("showModal", prevState.showModal, showModal);
-    // console.log("query", prevState.query, query);
-    // console.log("galleryItems", prevState.galleryItems, galleryItems);
-    // console.log("page", prevState.page, page);
-    // console.log("loading", prevState.loading, loading);
-    // console.log("error", prevState.error, error);
+    const { showModal, query, page, galleryItems } = this.state;
 
     if (prevState.query !== query) {
       this.setState({ loading: true, galleryItems: [], page: 1 });
@@ -70,7 +50,9 @@ export default class App extends Component {
             return;
           }
           this.totalHits = data.totalHits;
-          this.setState({ galleryItems: [...api.getNormalizeData(data)] });
+          this.setState({
+            galleryItems: [...api.getNormalizeData(data, page)],
+          });
         })
         .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
@@ -84,43 +66,26 @@ export default class App extends Component {
       this.setState({ loading: true });
       api
         .fetchPictures(query, page)
-        .then((data) =>
+        .then((data) => {
+          this.firstFindItemId = data.hits[0].id;
           this.setState(({ galleryItems }) => ({
-            galleryItems: [...galleryItems, ...api.getNormalizeData(data)],
-          }))
-        )
+            galleryItems: [
+              ...galleryItems,
+              ...api.getNormalizeData(data, page),
+            ],
+          }));
+        })
         .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
     }
+
+    if (prevState.galleryItems !== galleryItems) {
+      document.getElementById(this.firstFindItemId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.onHandleResize);
-  }
-
-  // switch state.pageFormat / response / mobile / tablet / desktop
-  onHandleResize = () => {
-    const { mobile, tablet, desktop } = this.breakPoints;
-    const { pageFormat } = this.state;
-    const viewPort = window.innerWidth;
-
-    if (viewPort < mobile && pageFormat !== "response") {
-      this.setState({ pageFormat: "response" });
-      return;
-    }
-    if (viewPort >= mobile && viewPort < tablet && pageFormat !== "mobile") {
-      this.setState({ pageFormat: "mobile" });
-      return;
-    }
-    if (viewPort >= tablet && viewPort < desktop && pageFormat !== "tablet") {
-      this.setState({ pageFormat: "tablet" });
-      return;
-    }
-    if (viewPort >= desktop && pageFormat !== "desktop") {
-      this.setState({ pageFormat: "desktop" });
-      return;
-    }
-  };
 
   toggleModal = () => this.setState((prev) => ({ showModal: !prev.showModal }));
 
@@ -137,8 +102,6 @@ export default class App extends Component {
   render() {
     const {
       query,
-      title,
-      pageFormat,
       showModal,
       galleryItems,
       loading,
@@ -150,9 +113,7 @@ export default class App extends Component {
     const isLastPage = api.countTotalResults(page) > this.totalHits;
 
     return (
-      <ThemeProvider
-        theme={{ ...colorThemes[title], ...geometry[pageFormat], spacing }}
-      >
+      <>
         <GlobalStyle />
 
         <div className="App">
@@ -193,7 +154,7 @@ export default class App extends Component {
             },
           }}
         />
-      </ThemeProvider>
+      </>
     );
   }
 }

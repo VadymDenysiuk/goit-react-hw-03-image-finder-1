@@ -13,6 +13,7 @@ const ImageGalleryItem = ({ url, onOpen, getItemId, id, tags }) => {
         alt={tags || "wonderfull photo"}
         loading="lazy"
         onClick={onImageOpen}
+        id={id}
       />
     </li>
   );

@@ -12,6 +12,11 @@
  * Стили компонента Searchbar
  */
 .Searchbar {
+  /* position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100vw; */
   display: flex;
   justify-content: center;
   align-items: center;
