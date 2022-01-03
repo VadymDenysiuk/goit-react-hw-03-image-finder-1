@@ -15,6 +15,6 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalContent = styled.div`
-  max-width: calc(90vw);
-  max-height: calc(90vh);
+  max-width: 90vw;
+  max-height: 90vh;
 `;
