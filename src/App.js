@@ -45,7 +45,7 @@ export default class App extends Component {
       this.setState({ galleryItems: [] });
     }
 
-    if (prevState.query !== query || prevState.page !== page) {
+    if ((prevState.query !== query && query) || prevState.page !== page) {
       this.fetchGalleryItems();
       return;
     }
@@ -71,7 +71,7 @@ export default class App extends Component {
 
       if (!data.hits.length) {
         toast('not found photos');
-        this.setState({ galleryItems: [] });
+        this.setState({ galleryItems: [], query: null });
         return;
       }
 
