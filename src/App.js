@@ -41,6 +41,10 @@ export default class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { showModal, query, page, galleryItems } = this.state;
 
+    if (prevState.query !== query) {
+      this.setState({ galleryItems: [] });
+    }
+
     if (prevState.query !== query || prevState.page !== page) {
       this.fetchGalleryItems();
       return;
