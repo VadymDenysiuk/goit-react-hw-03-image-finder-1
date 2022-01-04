@@ -25,7 +25,7 @@ export class Api {
 
   countTotalResults = page => page * this.per_page;
 
-  getNormalizeData = ({ hits }, page) => {
+  getNormalizeData = ({ hits }) => {
     const normalizeHits = hits.map(
       ({ id, webformatURL, largeImageURL, tags }) => {
         const imageUrl = webformatURL ? webformatURL : this._imageNotFoundLink;
@@ -36,7 +36,6 @@ export class Api {
           id,
           webformatURL: imageUrl,
           largeImageURL: largeimageUrl,
-          page,
           tags,
         };
       },
