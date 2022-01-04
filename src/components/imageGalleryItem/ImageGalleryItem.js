@@ -1,8 +1,15 @@
 import PropTypes from 'prop-types';
 
-const ImageGalleryItem = ({ url, onOpen, getItemId, id, tags }) => {
+const ImageGalleryItem = ({
+  url,
+  largeImageURL,
+  onOpen,
+  getItemId,
+  tags,
+  id,
+}) => {
   const onImageOpen = () => {
-    getItemId(id);
+    getItemId({ largeImageURL, tags });
     onOpen();
   };
   return (

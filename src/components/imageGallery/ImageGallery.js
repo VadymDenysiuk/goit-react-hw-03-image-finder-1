@@ -4,7 +4,7 @@ import ImageGalleryItem from '../imageGalleryItem/ImageGalleryItem';
 const ImageGallery = ({ items, onOpen, getItemId }) => {
   return (
     <ul className="ImageGallery">
-      {items.map(({ id, webformatURL, tags }) => (
+      {items.map(({ id, webformatURL, tags, largeImageURL }) => (
         <ImageGalleryItem
           key={id}
           url={webformatURL}
@@ -12,6 +12,7 @@ const ImageGallery = ({ items, onOpen, getItemId }) => {
           getItemId={getItemId}
           id={id}
           tags={tags}
+          largeImageURL={largeImageURL}
         />
       ))}
     </ul>

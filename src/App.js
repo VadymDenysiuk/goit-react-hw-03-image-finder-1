@@ -13,6 +13,7 @@ import Button from './components/button/Button';
 import Loader from './components/loader/Loader';
 import Error from './components/error/Error';
 import ScrollToTop from 'react-scroll-to-top';
+import ModalImage from './components/modalImage/ModalImage';
 
 const api = new Api(not_found_img_url);
 
@@ -62,9 +63,9 @@ export default class App extends Component {
   }
 
   fetchNewQuery = async () => {
+    this.totalHits = null;
     const { query, page } = this.state;
     this.setState({ loading: true, galleryItems: [] });
-    this.totalHits = null;
     try {
       const data = await api.fetchPictures(query, page);
       if (!data.hits.length) {
@@ -103,11 +104,7 @@ export default class App extends Component {
 
   getQuery = query => this.setState({ query, page: 1 });
 
-  getmodalContent = itemId =>
-    this.setState({ modalContent: this.getFilteredItem(itemId) });
-
-  getFilteredItem = itemId =>
-    this.state.galleryItems.filter(item => item.id === itemId)[0];
+  getmodalContent = galleryItem => this.setState({ modalContent: galleryItem });
 
   onLoadMoreClick = () => this.setState(({ page }) => ({ page: page + 1 }));
 
@@ -133,37 +130,37 @@ export default class App extends Component {
 
           {error && <Error errorMsg={error.message} />}
 
-          {!!galleryItems.length ? (
+          {!!galleryItems.length && (
             <>
               <ImageGallery
                 items={galleryItems}
                 onOpen={this.toggleModal}
                 getItemId={this.getmodalContent}
               />
-              {!loading ? (
-                !isLastPage && <Button onClick={this.onLoadMoreClick} />
-              ) : (
-                <Loader />
-              )}
+              <ScrollToTop
+                smooth
+                top="300"
+                style={{
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
+                }}
+                component={
+                  <BsFillArrowUpCircleFill size="2em" color="#cccccc" />
+                }
+              />
             </>
+          )}
+
+          {loading ? (
+            <Loader />
           ) : (
-            loading && <Loader />
+            !isLastPage && <Button onClick={this.onLoadMoreClick} />
           )}
         </div>
 
-        <ScrollToTop
-          smooth
-          top="300"
-          style={{
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-          }}
-          component={<BsFillArrowUpCircleFill size="2em" color="#cccccc" />}
-        />
-
         {showModal && (
           <Modal onClose={this.toggleModal}>
-            <img src={modalContent.largeImageURL} alt={modalContent.tags} />
+            <ModalImage data={modalContent} />
           </Modal>
         )}
 
