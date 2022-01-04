@@ -1,4 +1,4 @@
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 const ImageGalleryItem = ({ url, onOpen, getItemId, id, tags }) => {
   const onImageOpen = () => {
@@ -10,7 +10,7 @@ const ImageGalleryItem = ({ url, onOpen, getItemId, id, tags }) => {
       <img
         className="ImageGalleryItem-image"
         src={url}
-        alt={tags || "wonderfull photo"}
+        alt={tags || 'wonderfull photo'}
         loading="lazy"
         onClick={onImageOpen}
         id={id}

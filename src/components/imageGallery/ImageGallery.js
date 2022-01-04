@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
-import ImageGalleryItem from "../imageGalleryItem/ImageGalleryItem";
+import PropTypes from 'prop-types';
+import ImageGalleryItem from '../imageGalleryItem/ImageGalleryItem';
 
 const ImageGallery = ({ items, onOpen, getItemId }) => {
   return (

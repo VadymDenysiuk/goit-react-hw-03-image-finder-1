@@ -1,6 +1,6 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-export const StyledCloseBtn = styled.button.attrs((props) => {
+export const StyledCloseBtn = styled.button.attrs(props => {
   const { theme, mb } = props;
 
   return {

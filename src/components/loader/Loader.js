@@ -1,5 +1,5 @@
-import Spinner from "react-loader-spinner";
-import { LoaderContainer } from "./Loader.styled";
+import Spinner from 'react-loader-spinner';
+import { LoaderContainer } from './Loader.styled';
 
 const Loader = () => {
   return (

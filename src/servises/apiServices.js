@@ -1,37 +1,29 @@
 export class Api {
-  #API_KEY = "24136877-bceaa9033dc460acdc4ccde64";
-  #BASE_API_URL = "https://pixabay.com/api/";
+  #API_KEY = '24136877-bceaa9033dc460acdc4ccde64';
+  #BASE_API_URL = 'https://pixabay.com/api/';
 
-  constructor(not_fnd_img_url) {
+  constructor(notFoundImageUrl) {
     this.per_page = 12;
-    this.orientation = "horizontal";
-    this.image_type = "photo";
-    this._imageNotFoundLink = not_fnd_img_url;
+    this.orientation = 'horizontal';
+    this.image_type = 'photo';
+    this._imageNotFoundLink = notFoundImageUrl;
   }
 
   fetchPictures = async (query, page = 1) => {
-    try {
-      const urlParams = new URLSearchParams({
-        key: this.#API_KEY,
-        image_type: this.image_type,
-        orientation: this.orientation,
-        q: query,
-        page,
-        per_page: this.per_page,
-      });
+    const urlParams = new URLSearchParams({
+      key: this.#API_KEY,
+      image_type: this.image_type,
+      orientation: this.orientation,
+      q: query,
+      page,
+      per_page: this.per_page,
+    });
 
-      const res = await fetch(`${this.#BASE_API_URL}?${urlParams}`); // await
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(new Error(`${query} is not found`));
-    } catch (error) {
-      console.log("Ошибка", error);
-      return error;
-    }
+    const res = await fetch(`${this.#BASE_API_URL}?${urlParams}`); // await
+    return res.ok ? res.json() : Promise.reject(new Error(res.statusText));
   };
 
-  countTotalResults = (page) => page * this.per_page;
+  countTotalResults = page => page * this.per_page;
 
   getNormalizeData = ({ hits }, page) => {
     const normalizeHits = hits.map(
@@ -47,7 +39,7 @@ export class Api {
           page,
           tags,
         };
-      }
+      },
     );
     return normalizeHits;
   };

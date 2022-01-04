@@ -1,9 +1,9 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import { BsSearch } from "react-icons/bs";
+import { BsSearch } from 'react-icons/bs';
 
-import toast from "react-hot-toast";
+import toast from 'react-hot-toast';
 
 export default class SearchBar extends Component {
   static propTypes = {
@@ -12,26 +12,26 @@ export default class SearchBar extends Component {
   };
 
   state = {
-    searchQuery: "",
+    searchQuery: '',
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
     const normalizedQuery = this.getNormalizedQuery();
     if (!normalizedQuery) {
-      toast("Empty query");
+      toast('Empty query');
       return;
     }
     if (normalizedQuery === this.props.query) {
-      toast("Same query");
-      this.setState({ searchQuery: "" });
+      toast('Same query');
+      this.setState({ searchQuery: '' });
       return;
     }
     this.props.getQuery(this.state.searchQuery);
-    this.setState({ searchQuery: "" });
+    this.setState({ searchQuery: '' });
   };
 
-  handleChange = (e) => {
+  handleChange = e => {
     this.setState({ searchQuery: e.target.value });
   };
 
