@@ -41,17 +41,13 @@ export default class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { showModal, query, page, galleryItems } = this.state;
 
-    if (prevState.query !== query) {
-      this.fetchNewQuery();
+    if (prevState.query !== query || prevState.page !== page) {
+      this.fetchGalleryItems();
       return;
     }
 
     if (prevState.showModal !== showModal && !showModal) {
       this.setState({ modalContent: null });
-    }
-
-    if (prevState.page !== page) {
-      this.fetchMoreResults();
     }
 
     if (prevState.galleryItems !== galleryItems && page > 1) {
@@ -62,39 +58,31 @@ export default class App extends Component {
     }
   }
 
-  fetchNewQuery = async () => {
+  fetchGalleryItems = async () => {
     this.totalHits = null;
-    const { query, page } = this.state;
-    this.setState({ loading: true, galleryItems: [] });
-    try {
-      const data = await api.fetchPictures(query, page);
-      if (!data.hits.length) {
-        toast('not found photos');
-        return;
-      }
-      this.totalHits = data.totalHits;
-      const normalizeData = api.getNormalizeData(data, page);
-      this.setState({ galleryItems: normalizeData });
-    } catch (error) {
-      this.setState({ error });
-      toast.error('Somesing went whrong');
-    } finally {
-      this.setState({ loading: false });
-    }
-  };
-
-  fetchMoreResults = async () => {
-    const { query, page } = this.state;
+    const { query, page, galleryItems } = this.state;
     this.setState({ loading: true });
     try {
       const data = await api.fetchPictures(query, page);
+
+      if (!data.hits.length) {
+        toast('not found photos');
+        this.setState({ galleryItems: [] });
+        return;
+      }
+
+      this.totalHits = data.totalHits;
       this.itemToScroll = data.hits[0].id;
+
       const normalizeData = api.getNormalizeData(data, page);
-      this.setState(({ galleryItems }) => ({
-        galleryItems: [...galleryItems, ...normalizeData],
-      }));
+
+      this.setState({
+        galleryItems:
+          page === 1 ? normalizeData : [...galleryItems, ...normalizeData],
+      });
     } catch (error) {
       this.setState({ error });
+      toast.error('Somesing went whrong');
     } finally {
       this.setState({ loading: false });
     }
